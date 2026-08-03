@@ -41,6 +41,23 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+/* Hero keeps display fonts; rest of page uses Pretendard for readability */
+main,
+.site-footer,
+.review-modal {
+  --font-display: var(--font-body);
+}
+
+main,
+.site-footer,
+.review-modal,
+main button,
+main input,
+main select,
+main textarea {
+  font-family: var(--font-body);
+}
+
 img {
   max-width: 100%;
   display: block;
@@ -523,6 +540,61 @@ p {
   opacity: 0.85;
 }
 
+.hero__period--emphasis {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.85rem 1.1rem;
+  padding: 0.85rem 1.25rem;
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  background: rgba(0, 0, 0, 0.22);
+  animation: period-rise 0.9s var(--ease) both;
+  animation-delay: 0.35s;
+}
+
+.hero__period--emphasis .label {
+  font-size: 0.8rem;
+  opacity: 0.85;
+  color: var(--gold);
+}
+
+.hero__period--emphasis strong {
+  font-size: clamp(1.15rem, 2.4vw, 1.45rem);
+  font-weight: 800;
+  letter-spacing: 0.01em;
+}
+
+@keyframes period-rise {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.btn--hero-pulse {
+  animation: hero-cta-pulse 2.4s var(--ease) infinite;
+}
+
+@keyframes hero-cta-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(232, 93, 59, 0.45);
+  }
+  50% {
+    box-shadow: 0 0 0 12px rgba(232, 93, 59, 0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero__period--emphasis,
+  .btn--hero-pulse {
+    animation: none;
+  }
+}
+
 /* ---------- Sections ---------- */
 .section {
   padding: clamp(4rem, 10vw, 6.5rem) 0;
@@ -553,6 +625,7 @@ p {
 }
 
 .section__title {
+  font-family: var(--font-body);
   font-size: clamp(1.6rem, 3.5vw, 2.35rem);
   font-weight: 750;
   letter-spacing: -0.03em;
@@ -843,9 +916,118 @@ p {
   margin-top: 0;
 }
 
+/* ---------- Features summary ---------- */
+.features-summary {
+  background: var(--white);
+}
+
+.feature-highlights {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.25rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.feature-highlight {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.85rem;
+  align-items: start;
+  padding: 1.25rem 0 0;
+  border-top: 1px solid var(--line);
+}
+
+.feature-highlight__num {
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+  font-weight: 800;
+  line-height: 1;
+  color: var(--coral);
+}
+
+.feature-highlight__title {
+  margin: 0 0 0.35rem;
+  font-size: 1.05rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.feature-highlight__text {
+  margin: 0;
+  color: var(--ink-soft);
+  font-size: 0.94rem;
+  line-height: 1.55;
+  word-break: keep-all;
+}
+
+.feature-briefing-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin-top: 1.75rem;
+  color: var(--teal);
+  font-size: 1rem;
+  font-weight: 700;
+  text-decoration: none;
+  letter-spacing: -0.01em;
+  transition: color 0.2s ease, transform 0.2s ease;
+}
+
+.feature-briefing-link:hover {
+  color: var(--teal-deep);
+  transform: translateX(3px);
+}
+
 /* ---------- Benefits ---------- */
 .benefits {
-  background: var(--white);
+  background: #070f28;
+  color: var(--white);
+}
+
+.benefits--banner {
+  padding-top: clamp(2.5rem, 6vw, 4rem);
+  padding-bottom: clamp(2.5rem, 6vw, 4rem);
+}
+
+.benefits-banner {
+  margin: 0;
+  overflow: hidden;
+  border-radius: 8px;
+}
+
+.benefits-banner img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.benefits-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.85rem;
+  margin-top: 1.35rem;
+}
+
+.benefits-actions__btn {
+  min-height: 4.25rem;
+  font-size: 1.9rem;
+  font-weight: 750;
+  letter-spacing: -0.02em;
+}
+
+.benefits .gift-notes {
+  margin-top: 1.35rem;
+  color: rgba(255, 255, 255, 0.82);
+}
+
+.benefits .gift-notes strong {
+  color: #fff;
+}
+
+.benefits .gift-notes__alert {
+  color: #ff8f8f;
 }
 
 .gift-grid {
@@ -1034,6 +1216,19 @@ p {
   background: var(--mist);
 }
 
+.timeline__note {
+  margin: 0.9rem 0 0;
+  padding: 0.85rem 1rem;
+  border-left: 3px solid #d32f2f;
+  background: rgba(211, 47, 47, 0.08);
+  color: #d32f2f;
+  font-size: 0.95rem;
+  font-weight: 700;
+  line-height: 1.55;
+  letter-spacing: -0.02em;
+  word-break: keep-all;
+}
+
 .steps {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -1198,6 +1393,11 @@ p {
   font-weight: 700;
   color: var(--ink);
   letter-spacing: -0.02em;
+}
+
+.prep-note__em {
+  font-style: normal;
+  color: #d32f2f;
 }
 
 .prep-note__list span {
@@ -1876,6 +2076,10 @@ p {
     grid-template-columns: 1fr;
   }
 
+  .benefits-actions {
+    grid-template-columns: 1fr;
+  }
+
   .adoption__stats {
     grid-template-columns: 1fr;
     gap: 1.25rem;
@@ -1885,9 +2089,18 @@ p {
     grid-template-columns: 1fr;
   }
 
+  .feature-highlights {
+    grid-template-columns: 1fr;
+  }
+
   .adoption .section__title,
   .adoption .section__desc {
     white-space: normal;
+  }
+
+  .hero__period--emphasis {
+    width: 100%;
+    justify-content: space-between;
   }
 
   .compare {
