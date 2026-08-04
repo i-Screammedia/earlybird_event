@@ -1439,6 +1439,13 @@ p {
   line-height: 1.55;
   letter-spacing: -0.02em;
   word-break: keep-all;
+  white-space: nowrap;
+}
+
+@media (max-width: 900px) {
+  .timeline__note {
+    white-space: normal;
+  }
 }
 
 .steps {
