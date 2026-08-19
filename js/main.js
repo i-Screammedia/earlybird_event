@@ -4,7 +4,7 @@
   // Scroll reveal for sections
   if (!prefersReduced && "IntersectionObserver" in window) {
     const targets = document.querySelectorAll(
-      ".section__head, .adoption__stats, .review-card, .feature-row, .gift-pack, .gift-notes, .compare__col, .step, .howto__item, .prep-note, .form, .notice__list"
+      ".section__head, .adoption__stats, .review-card, .feature-row, .feature-highlight, .gift-pack, .benefits-banner, .benefits-actions, .gift-notes, .compare__col, .step, .howto__item, .prep-note, .form, .notice__list"
     );
 
     targets.forEach((el) => el.classList.add("reveal"));
@@ -43,6 +43,9 @@
       name: "entry.400100134",
       phone: "entry.718301232",
       email: "entry.726953345",
+      subject: "entry.1145712823",
+      grade: "entry.2060274946",
+      accounts: "entry.170032590",
       gift: "entry.1462146372",
       privacy: "entry.331149771",
       submitCheck: "entry.1359851501",
@@ -106,12 +109,15 @@
       const name = form.name?.value?.trim() || "";
       const phone = formatPhone(form.phone?.value || "");
       const email = form.email?.value?.trim() || "";
+      const subject = form.subject?.value?.trim() || "";
+      const grade = form.grade?.value?.trim() || "";
+      const accounts = form.accounts?.value?.trim() || "";
       const giftKey = form.gift?.value || "";
       const giftValue = GOOGLE_FORM.giftValues[giftKey];
 
       if (phoneInput) phoneInput.value = phone;
 
-      if (!office || !school || !name || !email || !giftValue) {
+      if (!office || !school || !name || !email || !subject || !grade || !accounts || !giftValue) {
         alert("필수 항목을 모두 입력해 주세요.");
         return;
       }
@@ -134,6 +140,9 @@
       body.set(GOOGLE_FORM.entries.name, name);
       body.set(GOOGLE_FORM.entries.phone, phone);
       body.set(GOOGLE_FORM.entries.email, email);
+      body.set(GOOGLE_FORM.entries.subject, subject);
+      body.set(GOOGLE_FORM.entries.grade, grade);
+      body.set(GOOGLE_FORM.entries.accounts, accounts);
       body.set(GOOGLE_FORM.entries.gift, giftValue);
       body.set(GOOGLE_FORM.entries.privacy, GOOGLE_FORM.privacyValue);
       body.set(GOOGLE_FORM.entries.submitCheck, GOOGLE_FORM.submitCheckValue);
