@@ -1728,6 +1728,186 @@ p {
   word-break: keep-all;
 }
 
+.book-picker {
+  display: grid;
+  gap: 0.65rem;
+}
+
+.book-picker__group {
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.book-picker__head {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.75rem 0.85rem;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.book-picker__subject-check {
+  display: inline-flex;
+  align-items: center;
+  margin: 0;
+  cursor: pointer;
+}
+
+.book-picker__subject-check input,
+.book-picker__item > input[type="checkbox"] {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.book-picker__check {
+  width: 1.25rem;
+  height: 1.25rem;
+  border: 1.5px solid rgba(255, 255, 255, 0.45);
+  border-radius: 4px;
+  background: transparent;
+  flex-shrink: 0;
+}
+
+.book-picker__subject-check input:checked + .book-picker__check,
+.book-picker__item > input[type="checkbox"]:checked + .book-picker__check {
+  border-color: #ff6b00;
+  background: #ff6b00
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none'%3E%3Cpath d='M3.5 8.2L6.4 11l6.1-6.5' stroke='white' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")
+    center / 0.85rem no-repeat;
+}
+
+.book-picker__toggle {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 0.55rem;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  font: inherit;
+}
+
+.book-picker__badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 1.7rem;
+  padding: 0.15rem 0.7rem;
+  border-radius: 999px;
+  color: #fff;
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.book-picker__badge--math {
+  background: #2f6bff;
+}
+
+.book-picker__badge--eng {
+  background: #1fa37a;
+}
+
+.book-picker__author {
+  color: rgba(255, 255, 255, 0.88);
+  font-size: 0.92rem;
+  font-weight: 600;
+}
+
+.book-picker__chevron {
+  width: 0.55rem;
+  height: 0.55rem;
+  border-right: 2px solid rgba(255, 255, 255, 0.7);
+  border-bottom: 2px solid rgba(255, 255, 255, 0.7);
+  transform: rotate(45deg);
+  transition: transform 0.2s ease;
+}
+
+.book-picker__group.is-open .book-picker__chevron {
+  transform: rotate(-135deg);
+  margin-top: 0.25rem;
+}
+
+.book-picker__body {
+  display: none;
+  gap: 0.35rem;
+  padding: 0.55rem 0.75rem 0.85rem;
+  background: rgba(0, 0, 0, 0.18);
+}
+
+.book-picker__group.is-open .book-picker__body {
+  display: grid;
+}
+
+.book-picker__body[hidden] {
+  display: none !important;
+}
+
+.book-picker__item {
+  display: grid;
+  grid-template-columns: auto 1fr minmax(7.5rem, 9rem) auto;
+  align-items: center;
+  gap: 0.55rem;
+  margin: 0;
+  padding: 0.45rem 0.35rem;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.book-picker__name {
+  font-size: 0.95rem;
+}
+
+.book-picker__count {
+  width: 100%;
+  min-height: 2.4rem !important;
+  padding: 0.4rem 0.65rem !important;
+  border-radius: 8px !important;
+  text-align: center;
+}
+
+.book-picker__count:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.book-picker__unit {
+  color: rgba(255, 255, 255, 0.75);
+  font-size: 0.9rem;
+}
+
+@media (max-width: 560px) {
+  .book-picker__item {
+    grid-template-columns: auto 1fr auto;
+    grid-template-areas:
+      "check name name"
+      "check count unit";
+  }
+
+  .book-picker__item > input[type="checkbox"] + .book-picker__check {
+    grid-area: check;
+  }
+
+  .book-picker__name {
+    grid-area: name;
+  }
+
+  .book-picker__count {
+    grid-area: count;
+  }
+
+  .book-picker__unit {
+    grid-area: unit;
+  }
+}
+
 .optional {
   font-weight: 400;
   opacity: 0.65;
