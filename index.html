@@ -345,33 +345,97 @@
             <input id="email" name="email" type="email" placeholder="example@email.com" autocomplete="email" required />
           </div>
           <div class="form__row">
-            <label for="subject">과목</label>
-            <select id="subject" name="subject" required>
-              <option value="">선택해 주세요</option>
-              <option value="수학">수학</option>
-              <option value="영어">영어</option>
-            </select>
-          </div>
-          <div class="form__row">
-            <label for="grade">학년</label>
-            <select id="grade" name="grade" required>
-              <option value="">선택해 주세요</option>
-              <option value="3학년">3학년</option>
-              <option value="4학년">4학년</option>
-              <option value="5학년">5학년</option>
-              <option value="6학년">6학년</option>
-            </select>
-          </div>
-          <div class="form__row">
-            <label for="accounts">계정수</label>
-            <p class="form__hint">※계정수는 교사용, 학생용 계정수를 모두 포함해서 써주세요.</p>
-            <input
-              id="accounts"
-              name="accounts"
-              type="text"
-              placeholder="예: 교사용 5 / 학생용 28"
-              required
-            />
+            <label>신청 과목·학년</label>
+            <p class="form__hint">※ 필요한 학년을 여러 개 선택할 수 있습니다. 계정수는 교사용·학생용을 모두 포함해 주세요.</p>
+            <div class="book-picker" id="book-picker">
+              <div class="book-picker__group" data-subject="수학">
+                <div class="book-picker__head">
+                  <label class="book-picker__subject-check">
+                    <input type="checkbox" class="book-picker__subject-toggle" data-subject="수학" />
+                    <span class="book-picker__check" aria-hidden="true"></span>
+                  </label>
+                  <button type="button" class="book-picker__toggle" aria-expanded="false">
+                    <span class="book-picker__badge book-picker__badge--math">초등 수학</span>
+                    <span class="book-picker__author">김성여 저자</span>
+                    <span class="book-picker__chevron" aria-hidden="true"></span>
+                  </button>
+                </div>
+                <div class="book-picker__body" hidden>
+                  <label class="book-picker__item">
+                    <input type="checkbox" class="book-picker__grade" data-subject="수학" data-label="수학 3" />
+                    <span class="book-picker__check" aria-hidden="true"></span>
+                    <span class="book-picker__name">수학 3</span>
+                    <input type="number" class="book-picker__count" min="1" step="1" inputmode="numeric" placeholder="사용 인원 수" disabled />
+                    <span class="book-picker__unit">명</span>
+                  </label>
+                  <label class="book-picker__item">
+                    <input type="checkbox" class="book-picker__grade" data-subject="수학" data-label="수학 4" />
+                    <span class="book-picker__check" aria-hidden="true"></span>
+                    <span class="book-picker__name">수학 4</span>
+                    <input type="number" class="book-picker__count" min="1" step="1" inputmode="numeric" placeholder="사용 인원 수" disabled />
+                    <span class="book-picker__unit">명</span>
+                  </label>
+                  <label class="book-picker__item">
+                    <input type="checkbox" class="book-picker__grade" data-subject="수학" data-label="수학 5" />
+                    <span class="book-picker__check" aria-hidden="true"></span>
+                    <span class="book-picker__name">수학 5</span>
+                    <input type="number" class="book-picker__count" min="1" step="1" inputmode="numeric" placeholder="사용 인원 수" disabled />
+                    <span class="book-picker__unit">명</span>
+                  </label>
+                  <label class="book-picker__item">
+                    <input type="checkbox" class="book-picker__grade" data-subject="수학" data-label="수학 6" />
+                    <span class="book-picker__check" aria-hidden="true"></span>
+                    <span class="book-picker__name">수학 6</span>
+                    <input type="number" class="book-picker__count" min="1" step="1" inputmode="numeric" placeholder="사용 인원 수" disabled />
+                    <span class="book-picker__unit">명</span>
+                  </label>
+                </div>
+              </div>
+
+              <div class="book-picker__group" data-subject="영어">
+                <div class="book-picker__head">
+                  <label class="book-picker__subject-check">
+                    <input type="checkbox" class="book-picker__subject-toggle" data-subject="영어" />
+                    <span class="book-picker__check" aria-hidden="true"></span>
+                  </label>
+                  <button type="button" class="book-picker__toggle" aria-expanded="false">
+                    <span class="book-picker__badge book-picker__badge--eng">초등 영어</span>
+                    <span class="book-picker__author">박유미 저자</span>
+                    <span class="book-picker__chevron" aria-hidden="true"></span>
+                  </button>
+                </div>
+                <div class="book-picker__body" hidden>
+                  <label class="book-picker__item">
+                    <input type="checkbox" class="book-picker__grade" data-subject="영어" data-label="영어 3" />
+                    <span class="book-picker__check" aria-hidden="true"></span>
+                    <span class="book-picker__name">영어 3</span>
+                    <input type="number" class="book-picker__count" min="1" step="1" inputmode="numeric" placeholder="사용 인원 수" disabled />
+                    <span class="book-picker__unit">명</span>
+                  </label>
+                  <label class="book-picker__item">
+                    <input type="checkbox" class="book-picker__grade" data-subject="영어" data-label="영어 4" />
+                    <span class="book-picker__check" aria-hidden="true"></span>
+                    <span class="book-picker__name">영어 4</span>
+                    <input type="number" class="book-picker__count" min="1" step="1" inputmode="numeric" placeholder="사용 인원 수" disabled />
+                    <span class="book-picker__unit">명</span>
+                  </label>
+                  <label class="book-picker__item">
+                    <input type="checkbox" class="book-picker__grade" data-subject="영어" data-label="영어 5" />
+                    <span class="book-picker__check" aria-hidden="true"></span>
+                    <span class="book-picker__name">영어 5</span>
+                    <input type="number" class="book-picker__count" min="1" step="1" inputmode="numeric" placeholder="사용 인원 수" disabled />
+                    <span class="book-picker__unit">명</span>
+                  </label>
+                  <label class="book-picker__item">
+                    <input type="checkbox" class="book-picker__grade" data-subject="영어" data-label="영어 6" />
+                    <span class="book-picker__check" aria-hidden="true"></span>
+                    <span class="book-picker__name">영어 6</span>
+                    <input type="number" class="book-picker__count" min="1" step="1" inputmode="numeric" placeholder="사용 인원 수" disabled />
+                    <span class="book-picker__unit">명</span>
+                  </label>
+                </div>
+              </div>
+            </div>
           </div>
           <div class="form__row">
             <label for="gift">선물 구성</label>
