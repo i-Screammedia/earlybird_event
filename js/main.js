@@ -94,6 +94,97 @@
     });
   }
 
+  // Subject/grade multi-select picker
+  const bookPicker = document.getElementById("book-picker");
+
+  const syncGradeRow = (gradeInput, { focusCount = false } = {}) => {
+    const item = gradeInput.closest(".book-picker__item");
+    const countInput = item?.querySelector(".book-picker__count");
+    if (!countInput) return;
+    countInput.disabled = !gradeInput.checked;
+    if (!gradeInput.checked) countInput.value = "";
+    else if (focusCount) countInput.focus();
+  };
+
+  const syncSubjectGroup = (subject) => {
+    const group = bookPicker?.querySelector(`.book-picker__group[data-subject="${subject}"]`);
+    const subjectToggle = group?.querySelector(".book-picker__subject-toggle");
+    if (!group || !subjectToggle) return;
+    const gradeInputs = [...group.querySelectorAll(".book-picker__grade")];
+    const anyChecked = gradeInputs.some((input) => input.checked);
+    subjectToggle.checked = anyChecked;
+  };
+
+  const collectBookSelections = () => {
+    if (!bookPicker) return [];
+    return [...bookPicker.querySelectorAll(".book-picker__grade:checked")].map((input) => {
+      const item = input.closest(".book-picker__item");
+      const count = item?.querySelector(".book-picker__count")?.value?.trim() || "";
+      return {
+        subject: input.dataset.subject || "",
+        label: input.dataset.label || "",
+        count,
+      };
+    });
+  };
+
+  const resetBookPicker = () => {
+    if (!bookPicker) return;
+    bookPicker.querySelectorAll(".book-picker__grade, .book-picker__subject-toggle").forEach((input) => {
+      input.checked = false;
+    });
+    bookPicker.querySelectorAll(".book-picker__count").forEach((input) => {
+      input.value = "";
+      input.disabled = true;
+    });
+    bookPicker.querySelectorAll(".book-picker__group").forEach((group) => {
+      group.classList.remove("is-open");
+      const body = group.querySelector(".book-picker__body");
+      const toggle = group.querySelector(".book-picker__toggle");
+      if (body) body.hidden = true;
+      if (toggle) toggle.setAttribute("aria-expanded", "false");
+    });
+  };
+
+  if (bookPicker) {
+    bookPicker.querySelectorAll(".book-picker__toggle").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const group = btn.closest(".book-picker__group");
+        if (!group) return;
+        const open = !group.classList.contains("is-open");
+        group.classList.toggle("is-open", open);
+        const body = group.querySelector(".book-picker__body");
+        if (body) body.hidden = !open;
+        btn.setAttribute("aria-expanded", open ? "true" : "false");
+      });
+    });
+
+    bookPicker.querySelectorAll(".book-picker__subject-toggle").forEach((toggle) => {
+      toggle.addEventListener("change", () => {
+        const subject = toggle.dataset.subject;
+        const group = bookPicker.querySelector(`.book-picker__group[data-subject="${subject}"]`);
+        if (!group) return;
+        group.classList.add("is-open");
+        const body = group.querySelector(".book-picker__body");
+        const headBtn = group.querySelector(".book-picker__toggle");
+        if (body) body.hidden = false;
+        if (headBtn) headBtn.setAttribute("aria-expanded", "true");
+
+        group.querySelectorAll(".book-picker__grade").forEach((gradeInput) => {
+          gradeInput.checked = toggle.checked;
+          syncGradeRow(gradeInput);
+        });
+      });
+    });
+
+    bookPicker.querySelectorAll(".book-picker__grade").forEach((gradeInput) => {
+      gradeInput.addEventListener("change", () => {
+        syncGradeRow(gradeInput, { focusCount: true });
+        syncSubjectGroup(gradeInput.dataset.subject);
+      });
+    });
+  }
+
   if (form) {
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
@@ -109,16 +200,25 @@
       const name = form.name?.value?.trim() || "";
       const phone = formatPhone(form.phone?.value || "");
       const email = form.email?.value?.trim() || "";
-      const subject = form.subject?.value?.trim() || "";
-      const grade = form.grade?.value?.trim() || "";
-      const accounts = form.accounts?.value?.trim() || "";
+      const selections = collectBookSelections();
       const giftKey = form.gift?.value || "";
       const giftValue = GOOGLE_FORM.giftValues[giftKey];
 
       if (phoneInput) phoneInput.value = phone;
 
-      if (!office || !school || !name || !email || !subject || !grade || !accounts || !giftValue) {
+      if (!office || !school || !name || !email || !giftValue) {
         alert("필수 항목을 모두 입력해 주세요.");
+        return;
+      }
+
+      if (!selections.length) {
+        alert("신청할 과목·학년을 하나 이상 선택해 주세요.");
+        return;
+      }
+
+      const missingCount = selections.find((item) => !item.count || Number(item.count) < 1);
+      if (missingCount) {
+        alert(`${missingCount.label}의 계정수를 입력해 주세요.`);
         return;
       }
 
@@ -127,6 +227,13 @@
         alert("연락처는 000-0000-0000 형식으로 입력해 주세요.");
         return;
       }
+
+      const subjects = [...new Set(selections.map((item) => item.subject))];
+      // 구글폼 과목/학년은 단일 선택형이라 대표값 전송, 상세 내역은 계정수 필드에 저장
+      const subjectValue = subjects[0] || "";
+      const firstGradeNum = (selections[0].label.match(/(\d)/) || [])[1];
+      const gradeValue = firstGradeNum ? `${firstGradeNum}학년` : selections[0].label;
+      const accounts = selections.map((item) => `${item.label} ${item.count}명`).join(" / ");
 
       if (submitBtn) {
         submitBtn.dataset.loading = "1";
@@ -140,8 +247,8 @@
       body.set(GOOGLE_FORM.entries.name, name);
       body.set(GOOGLE_FORM.entries.phone, phone);
       body.set(GOOGLE_FORM.entries.email, email);
-      body.set(GOOGLE_FORM.entries.subject, subject);
-      body.set(GOOGLE_FORM.entries.grade, grade);
+      body.set(GOOGLE_FORM.entries.subject, subjectValue);
+      body.set(GOOGLE_FORM.entries.grade, gradeValue);
       body.set(GOOGLE_FORM.entries.accounts, accounts);
       body.set(GOOGLE_FORM.entries.gift, giftValue);
       body.set(GOOGLE_FORM.entries.privacy, GOOGLE_FORM.privacyValue);
@@ -158,6 +265,7 @@
         });
 
         form.reset();
+        resetBookPicker();
         if (privacyCheck) privacyCheck.checked = false;
         alert("신청이 완료되었습니다. 감사합니다!");
       } catch (err) {
