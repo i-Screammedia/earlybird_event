@@ -1728,6 +1728,59 @@ p {
   word-break: keep-all;
 }
 
+.photo-field {
+  display: grid;
+  gap: 0.65rem;
+}
+
+.photo-field__input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+}
+
+.photo-field__button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 3rem;
+  padding: 0.7rem 0.9rem;
+  border: 1px dashed rgba(255, 255, 255, 0.4);
+  border-radius: var(--radius);
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  cursor: pointer;
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+.photo-field__button:hover,
+.photo-field__input:focus-visible + .photo-field__button {
+  border-color: var(--gold);
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.photo-field__name {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 0.88rem;
+  word-break: break-all;
+}
+
+.photo-field__preview {
+  display: block;
+  width: min(100%, 240px);
+  max-height: 180px;
+  object-fit: cover;
+  border-radius: var(--radius);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
 .book-picker {
   display: grid;
   gap: 0.65rem;
