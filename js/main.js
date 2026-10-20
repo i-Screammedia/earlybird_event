@@ -216,7 +216,33 @@
       formEl.submit();
     });
 
-  const uploadImageToDrive = async (file) => {
+  const sanitizeFilePart = (value) =>
+    String(value || "")
+      .trim()
+      .replace(/[\\/:*?"<>|]+/g, "")
+      .replace(/\s+/g, "_")
+      .slice(0, 40);
+
+  const buildUniqueFileName = (file, meta = {}) => {
+    const now = new Date();
+    const pad = (n) => String(n).padStart(2, "0");
+    const stamp = [
+      now.getFullYear(),
+      pad(now.getMonth() + 1),
+      pad(now.getDate()),
+      "_",
+      pad(now.getHours()),
+      pad(now.getMinutes()),
+      pad(now.getSeconds()),
+    ].join("");
+    const school = sanitizeFilePart(meta.school) || "school";
+    const name = sanitizeFilePart(meta.name) || "name";
+    const rand = Math.random().toString(36).slice(2, 6);
+    const original = sanitizeFilePart(String(file.name || "photo").replace(/\.[^.]+$/, "")) || "photo";
+    return `earlybird_${stamp}_${school}_${name}_${original}_${rand}.jpg`;
+  };
+
+  const uploadImageToDrive = async (file, meta = {}) => {
     if (window.location.protocol === "file:") {
       throw new Error(
         "로컬 파일(file://)에서는 이미지 업로드가 차단됩니다. GitHub 라이브 페이지에서 테스트해 주세요."
@@ -225,7 +251,7 @@
 
     const dataUrl = await fileToCompressedDataUrl(file);
     const base64 = dataUrl.replace(/^data:.*,/, "");
-    const safeName = String(file.name || "upload.jpg").replace(/\.[^.]+$/, "") + ".jpg";
+    const safeName = buildUniqueFileName(file, meta);
     const payload = {
       fileName: safeName,
       mimeType: "image/jpeg",
@@ -411,7 +437,7 @@
       }
 
       try {
-        const imageUrl = await uploadImageToDrive(photoFile);
+        const imageUrl = await uploadImageToDrive(photoFile, { school, name, email });
 
         if (submitBtn) submitBtn.textContent = "신청 중...";
 
