@@ -345,6 +345,24 @@
             <input id="email" name="email" type="email" placeholder="example@email.com" autocomplete="email" required />
           </div>
           <div class="form__row">
+            <label for="photo">첨부 이미지</label>
+            <p class="form__hint">※ 사진 촬영 또는 저장된 이미지를 첨부해 주세요.</p>
+            <div class="photo-field">
+              <input
+                id="photo"
+                name="photo"
+                class="photo-field__input"
+                type="file"
+                accept="image/*"
+                capture="environment"
+                required
+              />
+              <label for="photo" class="photo-field__button">사진 첨부 / 촬영</label>
+              <p class="photo-field__name" id="photo-name">선택된 파일 없음</p>
+              <img class="photo-field__preview" id="photo-preview" alt="첨부 이미지 미리보기" hidden />
+            </div>
+          </div>
+          <div class="form__row">
             <label>신청 과목·학년</label>
             <p class="form__hint">※ 필요한 학년을 여러 개 선택할 수 있습니다. 계정수는 교사용·학생용을 모두 포함해 주세요.</p>
             <div class="book-picker" id="book-picker">
