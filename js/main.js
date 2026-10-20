@@ -47,6 +47,7 @@
       grade: "entry.2060274946",
       accounts: "entry.170032590",
       gift: "entry.1462146372",
+      image: "entry.994985585",
       privacy: "entry.331149771",
       submitCheck: "entry.1359851501",
     },
@@ -56,6 +57,13 @@
     },
     privacyValue: "개인 정보 수집 및 이용에 동의 합니다.",
     submitCheckValue: "체크하고 제출 버튼을 클릭해주세요.",
+  };
+
+  const IMAGE_UPLOAD = {
+    endpoint:
+      "https://script.google.com/macros/s/AKfycbz5S9aWYND7EsEYubPn86aWmr_T6YI7AxIaTMaChe9u4v0zlG2Ri9nAEHQBw2ktIv33iw/exec",
+    maxSide: 960,
+    quality: 0.62,
   };
 
   const PHONE_PATTERN = /^\d{3}-\d{3,4}-\d{4}$/;
@@ -91,6 +99,160 @@
     phoneInput.addEventListener("input", () => {
       const next = formatPhone(phoneInput.value);
       if (phoneInput.value !== next) phoneInput.value = next;
+    });
+  }
+
+  const photoInput = document.getElementById("photo");
+  const photoName = document.getElementById("photo-name");
+  const photoPreview = document.getElementById("photo-preview");
+
+  const resetPhotoField = () => {
+    if (photoInput) photoInput.value = "";
+    if (photoName) photoName.textContent = "선택된 파일 없음";
+    if (photoPreview) {
+      photoPreview.hidden = true;
+      photoPreview.removeAttribute("src");
+    }
+  };
+
+  const fileToCompressedDataUrl = (file) =>
+    new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onerror = () => reject(new Error("이미지를 읽지 못했습니다."));
+      reader.onload = () => {
+        const img = new Image();
+        img.onerror = () => reject(new Error("이미지를 불러오지 못했습니다."));
+        img.onload = () => {
+          const scale = Math.min(1, IMAGE_UPLOAD.maxSide / Math.max(img.width, img.height));
+          const width = Math.max(1, Math.round(img.width * scale));
+          const height = Math.max(1, Math.round(img.height * scale));
+          const canvas = document.createElement("canvas");
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext("2d");
+          if (!ctx) {
+            reject(new Error("이미지 변환에 실패했습니다."));
+            return;
+          }
+          ctx.drawImage(img, 0, 0, width, height);
+          resolve(canvas.toDataURL("image/jpeg", IMAGE_UPLOAD.quality));
+        };
+        img.src = String(reader.result || "");
+      };
+      reader.readAsDataURL(file);
+    });
+
+  const uploadViaFetch = async (payload) => {
+    const endpoint = `${IMAGE_UPLOAD.endpoint}?format=json`;
+    const res = await fetch(endpoint, {
+      method: "POST",
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify(payload),
+      redirect: "follow",
+    });
+    const json = await res.json();
+    if (!json?.ok || !json?.url) {
+      throw new Error(json?.error || "이미지 업로드에 실패했습니다.");
+    }
+    return json.url;
+  };
+
+  // Apps Script CORS 우회: hidden iframe + postMessage
+  const uploadViaIframe = (payload) =>
+    new Promise((resolve, reject) => {
+      const frameName = `drive-upload-frame-${Date.now()}`;
+      const iframe = document.createElement("iframe");
+      iframe.name = frameName;
+      iframe.title = "image upload";
+      iframe.style.display = "none";
+      document.body.appendChild(iframe);
+
+      const formEl = document.createElement("form");
+      formEl.method = "POST";
+      formEl.action = IMAGE_UPLOAD.endpoint;
+      formEl.target = frameName;
+      formEl.acceptCharset = "UTF-8";
+      formEl.style.display = "none";
+
+      const input = document.createElement("input");
+      input.type = "hidden";
+      input.name = "payload";
+      input.value = JSON.stringify(payload);
+      formEl.appendChild(input);
+      document.body.appendChild(formEl);
+
+      const timer = window.setTimeout(() => {
+        cleanup();
+        reject(
+          new Error(
+            "이미지 업로드 시간이 초과되었습니다. GitHub 라이브 주소에서 다시 시도하고, Apps Script를 새 배포했는지 확인해 주세요."
+          )
+        );
+      }, 45000);
+
+      const onMessage = (event) => {
+        let data = event.data;
+        if (typeof data === "string") {
+          try {
+            data = JSON.parse(data);
+          } catch (err) {
+            return;
+          }
+        }
+        if (!data || data.source !== "earlybird-upload") return;
+        cleanup();
+        if (data.ok && data.url) resolve(data.url);
+        else reject(new Error(data.error || "이미지 업로드에 실패했습니다."));
+      };
+
+      const cleanup = () => {
+        window.clearTimeout(timer);
+        window.removeEventListener("message", onMessage);
+        formEl.remove();
+        iframe.remove();
+      };
+
+      window.addEventListener("message", onMessage);
+      formEl.submit();
+    });
+
+  const uploadImageToDrive = async (file) => {
+    if (window.location.protocol === "file:") {
+      throw new Error(
+        "로컬 파일(file://)에서는 이미지 업로드가 차단됩니다. GitHub 라이브 페이지에서 테스트해 주세요."
+      );
+    }
+
+    const dataUrl = await fileToCompressedDataUrl(file);
+    const base64 = dataUrl.replace(/^data:.*,/, "");
+    const safeName = String(file.name || "upload.jpg").replace(/\.[^.]+$/, "") + ".jpg";
+    const payload = {
+      fileName: safeName,
+      mimeType: "image/jpeg",
+      base64,
+    };
+
+    try {
+      return await uploadViaFetch(payload);
+    } catch (err) {
+      console.warn("fetch upload failed, fallback to iframe", err);
+      return uploadViaIframe(payload);
+    }
+  };
+
+  if (photoInput) {
+    photoInput.addEventListener("change", () => {
+      const file = photoInput.files?.[0];
+      if (!file) {
+        resetPhotoField();
+        return;
+      }
+      if (photoName) photoName.textContent = file.name;
+      if (photoPreview) {
+        const url = URL.createObjectURL(file);
+        photoPreview.hidden = false;
+        photoPreview.src = url;
+      }
     });
   }
 
@@ -228,6 +390,13 @@
         return;
       }
 
+      const photoFile = photoInput?.files?.[0];
+      if (!photoFile) {
+        photoInput?.focus();
+        alert("첨부 이미지를 선택해 주세요.");
+        return;
+      }
+
       const subjects = [...new Set(selections.map((item) => item.subject))];
       // 구글폼 과목/학년은 단일 선택형이라 대표값 전송, 상세 내역은 계정수 필드에 저장
       const subjectValue = subjects[0] || "";
@@ -238,25 +407,30 @@
       if (submitBtn) {
         submitBtn.dataset.loading = "1";
         submitBtn.disabled = true;
-        submitBtn.textContent = "신청 중...";
+        submitBtn.textContent = "이미지 업로드 중...";
       }
 
-      const body = new URLSearchParams();
-      body.set(GOOGLE_FORM.entries.office, office);
-      body.set(GOOGLE_FORM.entries.school, school);
-      body.set(GOOGLE_FORM.entries.name, name);
-      body.set(GOOGLE_FORM.entries.phone, phone);
-      body.set(GOOGLE_FORM.entries.email, email);
-      body.set(GOOGLE_FORM.entries.subject, subjectValue);
-      body.set(GOOGLE_FORM.entries.grade, gradeValue);
-      body.set(GOOGLE_FORM.entries.accounts, accounts);
-      body.set(GOOGLE_FORM.entries.gift, giftValue);
-      body.set(GOOGLE_FORM.entries.privacy, GOOGLE_FORM.privacyValue);
-      body.set(GOOGLE_FORM.entries.submitCheck, GOOGLE_FORM.submitCheckValue);
-      // Multi-page Google Form: page 1 (fields) + page 2 (consent)
-      body.set("pageHistory", "0,1");
-
       try {
+        const imageUrl = await uploadImageToDrive(photoFile);
+
+        if (submitBtn) submitBtn.textContent = "신청 중...";
+
+        const body = new URLSearchParams();
+        body.set(GOOGLE_FORM.entries.office, office);
+        body.set(GOOGLE_FORM.entries.school, school);
+        body.set(GOOGLE_FORM.entries.name, name);
+        body.set(GOOGLE_FORM.entries.phone, phone);
+        body.set(GOOGLE_FORM.entries.email, email);
+        body.set(GOOGLE_FORM.entries.subject, subjectValue);
+        body.set(GOOGLE_FORM.entries.grade, gradeValue);
+        body.set(GOOGLE_FORM.entries.accounts, accounts);
+        body.set(GOOGLE_FORM.entries.gift, giftValue);
+        body.set(GOOGLE_FORM.entries.image, imageUrl);
+        body.set(GOOGLE_FORM.entries.privacy, GOOGLE_FORM.privacyValue);
+        body.set(GOOGLE_FORM.entries.submitCheck, GOOGLE_FORM.submitCheckValue);
+        // Multi-page Google Form: page 1 (fields) + page 2 (consent)
+        body.set("pageHistory", "0,1");
+
         await fetch(GOOGLE_FORM.action, {
           method: "POST",
           mode: "no-cors",
@@ -266,11 +440,12 @@
 
         form.reset();
         resetBookPicker();
+        resetPhotoField();
         if (privacyCheck) privacyCheck.checked = false;
         alert("신청이 완료되었습니다. 감사합니다!");
       } catch (err) {
         console.error(err);
-        alert("신청 전송 중 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.");
+        alert(err?.message || "신청 전송 중 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.");
       } finally {
         if (submitBtn) {
           submitBtn.dataset.loading = "0";
